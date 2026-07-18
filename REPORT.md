@@ -202,6 +202,7 @@ Many Rwandan bookstores operate exclusively in physical locations, limiting thei
 | Shopping Cart | `docs/screenshots/cart.png` |
 | Checkout | `docs/screenshots/checkout.png` |
 | Admin Dashboard | `docs/screenshots/admin-dashboard.png` |
+| Docker Build (CI/CD) | `docs/screenshots/docker-build.png` |
 
 ---
 
