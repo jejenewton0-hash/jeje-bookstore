@@ -313,7 +313,26 @@ To enable auto-deploy, add `RENDER_DEPLOY_HOOK_URL` as a GitHub repository secre
 
 ## 📸 Screenshots
 
-See [`docs/screenshots/`](docs/screenshots/) for all application screenshots.
+### Homepage
+![Homepage](docs/screenshots/homepage.png)
+
+### Products Page
+![Products](docs/screenshots/products.png)
+
+### Product Detail
+![Product Detail](docs/screenshots/product-detail.png)
+
+### Shopping Cart
+![Cart](docs/screenshots/cart.png)
+
+### Checkout
+![Checkout](docs/screenshots/checkout.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+
+### Docker Build (CI/CD)
+![Docker Build](docs/screenshots/docker-build.png)
 
 ---
 
