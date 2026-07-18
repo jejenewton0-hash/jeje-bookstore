@@ -334,6 +334,9 @@ To enable auto-deploy, add `RENDER_DEPLOY_HOOK_URL` as a GitHub repository secre
 ### Docker Build (CI/CD)
 ![Docker Build](docs/screenshots/docker-build.png)
 
+### CI/CD Pipeline
+![CI/CD Pipeline](docs/screenshots/cicd-pipeline.png)
+
 ---
 
 ## 📄 Project Report
