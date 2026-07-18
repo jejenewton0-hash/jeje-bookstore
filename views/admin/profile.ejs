@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div style="max-width:500px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <h1 class="page-title" style="margin:0"><i class="fas fa-id-badge"></i> Admin Profile</h1>
+        <a href="/admin" class="btn btn-outline btn-sm">← Dashboard</a>
+      </div>
+
+      <div class="admin-form-box">
+        <div style="text-align:center;margin-bottom:1.5rem">
+          <% if (user && user.photo) { %>
+            <img id="photoPreview" src="<%= user.photo %>" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)">
+          <% } else { %>
+            <div id="photoPreview" style="width:100px;height:100px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto">
+              <i class="fas fa-user-shield" style="font-size:2.5rem;color:#fff"></i>
+            </div>
+          <% } %>
+          <p style="margin-top:0.5rem;color:var(--text-light);font-size:0.9rem"><span class="badge badge-success">Admin</span></p>
+          <label for="photoInput" style="display:inline-block;margin-top:0.25rem;cursor:pointer;color:var(--primary);font-size:0.9rem">
+            <i class="fas fa-camera"></i> Change Photo
+          </label>
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)" />
+        </div>
+
+        <form id="profileForm">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" value="<%= user.name %>" required class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" value="<%= user.email %>" disabled class="form-control" style="background:#f8f9fa" />
+          </div>
+          <div id="profileMsg" style="display:none;margin-bottom:1rem"></div>
+          <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+let photoBase64 = '';
+
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 1024 * 1024) {
+    alert('Image must be under 1MB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    photoBase64 = e.target.result;
+    document.getElementById('photoPreview').outerHTML =
+      '<img id="photoPreview" src="' + photoBase64 + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)">';
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('profileForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('profileMsg');
+  const res = await fetch('/api/auth/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: document.getElementById('name').value,
+      photo: photoBase64 || '<%= user.photo || "" %>'
+    })
+  });
+  const data = await res.json();
+  msg.style.display = 'block';
+  if (data.success) {
+    msg.className = 'alert alert-success';
+    msg.textContent = 'Profile updated!';
+    setTimeout(() => window.location.reload(), 1000);
+  } else {
+    msg.className = 'alert alert-danger';
+    msg.textContent = data.error || 'Update failed.';
+  }
+});
+</script>
+
+<%- include('../partials/footer') %>

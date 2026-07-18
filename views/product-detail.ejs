@@ -1,0 +1,84 @@
+<%- include('partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/">Home</a> &rsaquo;
+      <a href="/products">Books</a> &rsaquo;
+      <a href="/products?category=<%= product.category ? product.category._id : '' %>"><%= product.category ? product.category.name : '' %></a> &rsaquo;
+      <span><%= product.name %></span>
+    </nav>
+
+    <div class="product-detail-layout">
+      <div class="product-detail-img">
+        <img src="<%= product.image %>" alt="<%= product.name %>" onerror="this.src='/images/book-placeholder.png'" />
+      </div>
+      <div class="product-detail-info">
+        <span class="product-category"><%= product.category ? product.category.name : '' %></span>
+        <h1><%= product.name %></h1>
+        <p class="product-author-lg">by <strong><%= product.author %></strong></p>
+        <% if (product.isbn) { %><p class="isbn">ISBN: <%= product.isbn %></p><% } %>
+        <div class="product-detail-price"><%= Number(product.price).toLocaleString() %> RWF</div>
+        <p class="product-description"><%= product.description %></p>
+        <div class="stock-info">
+          <% if (product.stock > 0) { %>
+            <span class="badge badge-success"><i class="fas fa-check"></i> In Stock (<%= product.stock %> available)</span>
+          <% } else { %>
+            <span class="badge badge-danger"><i class="fas fa-times"></i> Out of Stock</span>
+          <% } %>
+        </div>
+        <div class="quantity-row">
+          <label>Quantity:</label>
+          <div class="qty-control">
+            <button type="button" onclick="changeQty(-1)">-</button>
+            <input type="number" id="qty" value="1" min="1" max="<%= product.stock %>" />
+            <button type="button" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg add-to-cart-btn"
+          data-id="<%= product._id %>" id="addToCartBtn" <%= product.stock === 0 ? 'disabled' : '' %>>
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+        <a href="/cart" class="btn btn-outline btn-lg">View Cart</a>
+      </div>
+    </div>
+
+    <% if (related.length > 0) { %>
+    <div class="related-section">
+      <h2 class="section-title">You May Also Like</h2>
+      <div class="products-grid">
+        <% related.forEach(p => { %>
+        <div class="product-card">
+          <a href="/products/<%= p._id %>">
+            <div class="product-img-wrap">
+              <img src="<%= p.image %>" alt="<%= p.name %>" onerror="this.src='/images/book-placeholder.png'" />
+            </div>
+            <div class="product-info">
+              <h3 class="product-name"><%= p.name %></h3>
+              <p class="product-author">by <%= p.author %></p>
+              <span class="product-price"><%= Number(p.price).toLocaleString() %> RWF</span>
+            </div>
+          </a>
+          <button class="btn btn-primary btn-block add-to-cart-btn" data-id="<%= p._id %>">
+            <i class="fas fa-cart-plus"></i> Add to Cart
+          </button>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<script>
+function changeQty(delta) {
+  const input = document.getElementById('qty');
+  const max = parseInt(input.max) || 99;
+  input.value = Math.max(1, Math.min(max, parseInt(input.value) + delta));
+}
+document.getElementById('addToCartBtn')?.addEventListener('click', function() {
+  const qty = parseInt(document.getElementById('qty').value);
+  addToCart('<%= product._id %>', qty);
+});
+</script>
+<%- include('partials/footer') %>

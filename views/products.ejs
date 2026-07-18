@@ -1,0 +1,105 @@
+<%- include('partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div class="page-header">
+      <h1>All Books</h1>
+      <p><%= products.length %> book<%= products.length !== 1 ? 's' : '' %> found</p>
+    </div>
+
+    <div class="shop-layout">
+      <!-- Sidebar Filters -->
+      <aside class="sidebar">
+        <form action="/products" method="GET" id="filterForm">
+          <div class="filter-group">
+            <h3>Search</h3>
+            <input type="text" name="search" placeholder="Title or author..." value="<%= filters.search || '' %>" />
+          </div>
+          <div class="filter-group">
+            <h3>Category</h3>
+            <% categories.forEach(cat => { %>
+            <label class="filter-label">
+              <input type="radio" name="category" value="<%= cat._id %>"
+                <%= filters.category == cat._id ? 'checked' : '' %> onchange="this.form.submit()" />
+              <%= cat.name %>
+            </label>
+            <% }) %>
+            <label class="filter-label">
+              <input type="radio" name="category" value="" <%= !filters.category ? 'checked' : '' %> onchange="this.form.submit()" />
+              All Categories
+            </label>
+          </div>
+          <div class="filter-group">
+            <h3>Price Range (RWF)</h3>
+            <div class="price-inputs">
+              <input type="number" name="min" placeholder="Min" value="<%= filters.min || '' %>" />
+              <span>–</span>
+              <input type="number" name="max" placeholder="Max" value="<%= filters.max || '' %>" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+          <a href="/products" class="btn btn-outline btn-block mt-1">Clear Filters</a>
+        </form>
+      </aside>
+
+      <!-- Products Grid -->
+      <div class="products-main">
+        <% if (products.length === 0) { %>
+          <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>No books found</h3>
+            <p>Try adjusting your search or filters.</p>
+            <a href="/products" class="btn btn-primary">View All Books</a>
+          </div>
+        <% } else { %>
+        <div class="products-grid">
+          <% products.forEach(product => { %>
+          <div class="product-card">
+            <a href="/products/<%= product._id %>">
+              <div class="product-img-wrap">
+                <img src="<%= product.image %>" alt="<%= product.name %>" onerror="this.src='/images/book-placeholder.png'" />
+              </div>
+              <div class="product-info">
+                <span class="product-category"><%= product.category ? product.category.name : '' %></span>
+                <h3 class="product-name"><%= product.name %></h3>
+                <p class="product-author">by <%= product.author %></p>
+                <div class="product-footer">
+                  <span class="product-price"><%= Number(product.price).toLocaleString() %> RWF</span>
+                  <% if (product.stock > 0) { %>
+                    <span class="badge badge-success">In Stock</span>
+                  <% } else { %>
+                    <span class="badge badge-danger">Out of Stock</span>
+                  <% } %>
+                </div>
+              </div>
+            </a>
+            <button class="btn btn-primary btn-block add-to-cart-btn"
+              data-id="<%= product._id %>" <%= product.stock === 0 ? 'disabled' : '' %>>
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (currentPage > 1) { %>
+          <a href="/products?<%= new URLSearchParams({...filters, page: currentPage - 1}).toString() %>" class="btn btn-outline btn-sm">← Prev</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="/products?<%= new URLSearchParams({...filters, page: i}).toString() %>"
+            class="btn btn-sm <%= i === currentPage ? 'btn-primary' : 'btn-outline' %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+          <a href="/products?<%= new URLSearchParams({...filters, page: currentPage + 1}).toString() %>" class="btn btn-outline btn-sm">Next →</a>
+        <% } %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

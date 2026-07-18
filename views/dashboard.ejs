@@ -1,0 +1,100 @@
+<%- include('partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h1 class="page-title" style="margin:0"><i class="fas fa-tachometer-alt"></i> My Dashboard</h1>
+      <a href="/profile" class="btn btn-outline btn-sm"><i class="fas fa-user-edit"></i> Edit Profile</a>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="admin-form-box" style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem">
+      <div>
+        <% if (user && user.photo) { %>
+          <img src="<%= user.photo %>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)">
+        <% } else { %>
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center">
+            <i class="fas fa-user" style="font-size:2rem;color:#fff"></i>
+          </div>
+        <% } %>
+      </div>
+      <div>
+        <h2 style="margin:0"><%= user.name %></h2>
+        <p style="color:var(--text-light);margin:0.25rem 0"><%= user.email %></p>
+        <span class="badge badge-success">Customer</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="admin-stats" style="margin-bottom:2rem">
+      <div class="stat-card">
+        <i class="fas fa-shopping-bag"></i>
+        <div>
+          <span class="stat-num"><%= orders.length %></span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <span class="stat-num"><%= orders.filter(o => o.status === 'delivered').length %></span>
+          <span class="stat-label">Delivered</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-clock"></i>
+        <div>
+          <span class="stat-num"><%= orders.filter(o => o.status === 'pending' || o.status === 'processing').length %></span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-money-bill-wave"></i>
+        <div>
+          <span class="stat-num"><%= Number(orders.filter(o=>o.status!=='cancelled').reduce((s,o)=>s+o.total,0)).toLocaleString() %> RWF</span>
+          <span class="stat-label">Total Spent</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="admin-form-box">
+      <h2 style="margin-bottom:1rem"><i class="fas fa-list-alt"></i> My Orders</h2>
+      <% if (orders.length === 0) { %>
+        <div style="text-align:center;padding:2rem;color:var(--text-light)">
+          <i class="fas fa-shopping-bag" style="font-size:3rem;margin-bottom:1rem;display:block"></i>
+          <p>No orders yet. <a href="/products">Start shopping!</a></p>
+        </div>
+      <% } else { %>
+      <div style="overflow-x:auto">
+        <table class="cart-table">
+          <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            <% orders.forEach(o => { %>
+            <tr>
+              <td><strong>#<%= o._id.toString().slice(-6).toUpperCase() %></strong></td>
+              <td>
+                <% (o.items || []).slice(0,2).forEach(item => { %>
+                  <div style="font-size:0.85rem"><%= item.name %> x<%= item.quantity %></div>
+                <% }) %>
+                <% if ((o.items||[]).length > 2) { %><small style="color:var(--text-light)">+<%= o.items.length-2 %> more</small><% } %>
+              </td>
+              <td><strong><%= Number(o.total).toLocaleString() %> RWF</strong></td>
+              <td><%= o.paymentMethod === 'momo' ? '📱 MoMo' : '💵 COD' %></td>
+              <td>
+                <span class="badge <%= o.status==='delivered'?'badge-success':o.status==='cancelled'?'badge-danger':'badge-warning' %>">
+                  <%= o.status.toUpperCase() %>
+                </span>
+              </td>
+              <td style="font-size:0.85rem"><%= new Date(o.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

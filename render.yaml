@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: jeje-bookstore
+    env: node
+    buildCommand: npm ci && mkdir -p data
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false

@@ -1,0 +1,172 @@
+<%- include('partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <h1 class="page-title">Checkout</h1>
+    <div class="checkout-layout">
+      <!-- Customer Form -->
+      <div class="checkout-form-wrap">
+        <h2>Delivery Information</h2>
+        <form id="checkoutForm" novalidate>
+          <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" name="name" placeholder="e.g. Jean Pierre Habimana" required />
+            <span class="field-error" id="nameErr"></span>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required />
+            <span class="field-error" id="emailErr"></span>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" placeholder="+250 7XX XXX XXX" required />
+            <span class="field-error" id="phoneErr"></span>
+          </div>
+          <div class="form-group">
+            <label for="address">Delivery Address *</label>
+            <textarea id="address" name="address" rows="3" placeholder="Street, District, Province, Rwanda" required></textarea>
+            <span class="field-error" id="addressErr"></span>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="form-group">
+            <label>Payment Method *</label>
+            <div class="payment-options">
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="cod" checked onchange="toggleMomo(false)" />
+                <i class="fas fa-money-bill-wave"></i> Cash on Delivery
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="momo" onchange="toggleMomo(true)" />
+                <i class="fas fa-mobile-alt"></i> MTN Mobile Money
+              </label>
+            </div>
+          </div>
+
+          <!-- MoMo section -->
+          <div id="momoSection" style="display:none">
+            <div class="form-group">
+              <label for="momoPhone">MTN MoMo Phone *</label>
+              <input type="tel" id="momoPhone" placeholder="e.g. 0788000000" />
+            </div>
+            <button type="button" class="btn btn-outline btn-block" id="momoBtn" onclick="requestMomo()">
+              <i class="fas fa-paper-plane"></i> Send Payment Request
+            </button>
+            <div id="momoStatus" style="margin-top:0.5rem;font-size:0.9rem"></div>
+          </div>
+
+          <div id="formError" class="alert alert-danger" style="display:none"></div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="placeOrderBtn" style="margin-top:1rem">
+            <i class="fas fa-check-circle"></i> Place Order
+          </button>
+        </form>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="checkout-summary">
+        <h2>Order Summary</h2>
+        <div id="orderSummary"><div class="loading"><i class="fas fa-spinner fa-spin"></i></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+let cartTotal = 0;
+
+function toggleMomo(show) {
+  document.getElementById('momoSection').style.display = show ? 'block' : 'none';
+}
+
+async function requestMomo() {
+  const phone = document.getElementById('momoPhone').value.trim();
+  if (!phone) { document.getElementById('momoStatus').innerHTML = '<span style="color:red">Enter your MoMo phone number</span>'; return; }
+  const btn = document.getElementById('momoBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+  const res = await fetch('/api/orders/momo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, amount: cartTotal })
+  });
+  const data = await res.json();
+  document.getElementById('momoStatus').innerHTML = data.success
+    ? `<span style="color:green"><i class="fas fa-check-circle"></i> ${data.message}</span>`
+    : `<span style="color:red">${data.error}</span>`;
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Payment Request';
+}
+
+async function loadSummary() {
+  const res = await fetch('/api/cart');
+  const data = await res.json();
+  const el = document.getElementById('orderSummary');
+  if (!data.items || data.items.length === 0) { window.location.href = '/cart'; return; }
+  cartTotal = data.total;
+  el.innerHTML = data.items.map(i => `
+    <div class="summary-item">
+      <img src="${i.image}" alt="${i.name}" onerror="this.src='/images/book-placeholder.png'" />
+      <div class="summary-item-info">
+        <span>${i.name}</span>
+        <small>Qty: ${i.quantity}</small>
+      </div>
+      <span>${Number(i.price * i.quantity).toLocaleString()} RWF</span>
+    </div>`).join('') + `
+    <div class="summary-divider"></div>
+    <div class="summary-row"><span>Delivery</span><span>Free</span></div>
+    <div class="summary-row total"><span>Total</span><span>${Number(data.total).toLocaleString()} RWF</span></div>`;
+}
+
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  let valid = true;
+  const fields = [
+    { id: 'name', errId: 'nameErr', msg: 'Full name is required' },
+    { id: 'email', errId: 'emailErr', msg: 'Valid email is required', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    { id: 'phone', errId: 'phoneErr', msg: 'Phone number is required' },
+    { id: 'address', errId: 'addressErr', msg: 'Delivery address is required' }
+  ];
+  fields.forEach(f => {
+    const val = document.getElementById(f.id).value.trim();
+    const errEl = document.getElementById(f.errId);
+    if (!val || (f.pattern && !f.pattern.test(val))) { errEl.textContent = f.msg; valid = false; }
+    else { errEl.textContent = ''; }
+  });
+  if (!valid) return;
+
+  const btn = document.getElementById('placeOrderBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+  const body = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    paymentMethod
+  };
+
+  const res = await fetch('/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (data.success) {
+    window.location.href = `/order-confirmation/${data.orderId}`;
+  } else {
+    const errEl = document.getElementById('formError');
+    errEl.textContent = data.error || 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
+  }
+});
+
+loadSummary();
+
+// Pre-fill from session if logged in
+<% if (locals.user) { %>
+document.getElementById('name').value = '<%= user.name %>';
+document.getElementById('email').value = '<%= user.email %>';
+<% } %>
+</script>
+<%- include('partials/footer') %>

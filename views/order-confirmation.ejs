@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div class="confirmation-box">
+      <div class="confirmation-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h1>Order Confirmed!</h1>
+      <p class="confirmation-msg">Thank you, <strong><%= order.customerName %></strong>! Your order has been placed successfully.</p>
+      <div class="order-meta">
+        <div class="order-meta-item">
+          <span>Order ID</span>
+          <strong>#<%= order._id.toString().slice(-5).toUpperCase() %></strong>
+        </div>
+        <div class="order-meta-item">
+          <span>Date</span>
+          <strong><%= new Date(order.createdAt).toLocaleDateString('en-RW', { year:'numeric', month:'long', day:'numeric' }) %></strong>
+        </div>
+        <div class="order-meta-item">
+          <span>Status</span>
+          <strong class="badge badge-warning"><%= order.status.toUpperCase() %></strong>
+        </div>
+        <div class="order-meta-item">
+          <span>Total</span>
+          <strong><%= Number(order.total).toLocaleString() %> RWF</strong>
+        </div>
+      </div>
+
+      <div class="order-items-list">
+        <h3>Items Ordered</h3>
+        <% items.forEach(item => { %>
+        <div class="order-item-row">
+          <img src="<%= item.image %>" alt="<%= item.name %>" onerror="this.src='/images/book-placeholder.png'" />
+          <div class="order-item-info">
+            <span><%= item.name %></span>
+            <small>Qty: <%= item.quantity %></small>
+          </div>
+          <span><%= Number(item.price * item.quantity).toLocaleString() %> RWF</span>
+        </div>
+        <% }) %>
+      </div>
+
+      <div class="delivery-info">
+        <h3>Delivery Details</h3>
+        <p><i class="fas fa-envelope"></i> Confirmation sent to: <strong><%= order.customerEmail %></strong></p>
+        <p><i class="fas fa-map-marker-alt"></i> Delivering to: <strong><%= order.customerAddress %></strong></p>
+      </div>
+
+      <div class="confirmation-actions">
+        <a href="/products" class="btn btn-primary btn-lg">Continue Shopping</a>
+        <a href="/" class="btn btn-outline btn-lg">Back to Home</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

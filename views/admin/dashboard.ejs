@@ -1,0 +1,134 @@
+<%- include('../partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h1 class="page-title" style="margin:0"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+      <div style="display:flex;gap:0.5rem">
+        <a href="/admin/analytics" class="btn btn-outline btn-sm"><i class="fas fa-chart-line"></i> Analytics</a>
+        <a href="/admin/products" class="btn btn-outline btn-sm"><i class="fas fa-book"></i> Products</a>
+        <a href="/admin/orders" class="btn btn-outline btn-sm"><i class="fas fa-list-alt"></i> Orders</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="admin-stats">
+      <div class="stat-card">
+        <i class="fas fa-money-bill-wave"></i>
+        <div>
+          <span class="stat-num"><%= Number(totalRevenue).toLocaleString() %> RWF</span>
+          <span class="stat-label">Total Revenue</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-shopping-bag"></i>
+        <div>
+          <span class="stat-num"><%= orders.length %></span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <div>
+          <span class="stat-num"><%= totalUsers %></span>
+          <span class="stat-label">Customers</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-box"></i>
+        <div>
+          <span class="stat-num"><%= products.length %></span>
+          <span class="stat-label">Products</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Status + Last 7 Days -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem">
+      <!-- Order Status -->
+      <div class="admin-form-box">
+        <h2 style="margin-bottom:1rem">Orders by Status</h2>
+        <% const statusColors = { pending:'badge-warning', processing:'badge-warning', shipped:'badge-warning', delivered:'badge-success', cancelled:'badge-danger' }; %>
+        <% Object.entries(statusCount).forEach(([status, cnt]) => { %>
+        <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #dee2e6">
+          <span class="badge <%= statusColors[status] %>"><%= status.toUpperCase() %></span>
+          <strong><%= cnt %> orders</strong>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Last 7 Days -->
+      <div class="admin-form-box">
+        <h2 style="margin-bottom:1rem">Last 7 Days Revenue</h2>
+        <% last7.forEach(day => { %>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #dee2e6;font-size:0.9rem">
+          <span><%= day.label %></span>
+          <span><%= day.count %> orders</span>
+          <strong style="color:var(--primary)"><%= Number(day.revenue).toLocaleString() %> RWF</strong>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Top Products + Recent Users -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem">
+      <!-- Top Products -->
+      <div class="admin-form-box">
+        <h2 style="margin-bottom:1rem"><i class="fas fa-trophy"></i> Top Selling Books</h2>
+        <% if (topProducts.length === 0) { %>
+          <p style="color:var(--text-light)">No sales yet.</p>
+        <% } else { %>
+        <% topProducts.forEach((p, i) => { %>
+        <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #dee2e6;font-size:0.9rem">
+          <span><strong>#<%= i+1 %></strong> <%= p.name %></span>
+          <span><%= p.qty %> sold</span>
+          <strong style="color:var(--primary)"><%= Number(p.revenue).toLocaleString() %> RWF</strong>
+        </div>
+        <% }) %>
+        <% } %>
+      </div>
+
+      <!-- Recent Users -->
+      <div class="admin-form-box">
+        <h2 style="margin-bottom:1rem"><i class="fas fa-users"></i> Recent Customers</h2>
+        <% if (recentUsers.length === 0) { %>
+          <p style="color:var(--text-light)">No customers yet.</p>
+        <% } else { %>
+        <% recentUsers.forEach(u => { %>
+        <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #dee2e6;font-size:0.9rem">
+          <span><i class="fas fa-user" style="color:var(--primary)"></i> <%= u.name %></span>
+          <span style="color:var(--text-light)"><%= u.email %></span>
+        </div>
+        <% }) %>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="admin-form-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin:0">Recent Orders</h2>
+        <a href="/admin/orders" class="btn btn-outline btn-sm">View All</a>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="cart-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            <% recentOrders.forEach(o => { %>
+            <tr>
+              <td><strong>#<%= o._id.toString().slice(-5).toUpperCase() %></strong></td>
+              <td><%= o.customerName %></td>
+              <td><%= Number(o.total).toLocaleString() %> RWF</td>
+              <td><%= o.paymentMethod || 'cod' %></td>
+              <td><span class="badge <%= o.status==='delivered'?'badge-success':o.status==='cancelled'?'badge-danger':'badge-warning' %>"><%= o.status.toUpperCase() %></span></td>
+              <td><%= new Date(o.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

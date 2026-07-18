@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | JEJE</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo"><i class="fas fa-book-open"></i> JEJE</a>
+    <nav class="nav" id="mainNav">
+      <a href="/">Home</a>
+      <a href="/products">Books</a>
+      <a href="/products?category=1">Fiction</a>
+      <a href="/products?category=3">Education</a>
+    </nav>
+    <div class="header-actions">
+      <form action="/products" method="GET" class="search-form">
+        <input type="text" name="search" placeholder="Search books or author..." value="<%= typeof filters !== 'undefined' ? (filters.search || '') : '' %>" />
+        <button type="submit"><i class="fas fa-search"></i></button>
+      </form>
+      <a href="/cart" class="cart-btn">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-badge" id="cartBadge"><%= cartCount %></span>
+      </a>
+      <% if (user) { %>
+        <div class="user-menu" style="position:relative;display:inline-block">
+          <span class="user-greeting" style="cursor:pointer" onclick="this.nextElementSibling.classList.toggle('open')">
+            <% if (user.photo) { %>
+              <img src="<%= user.photo %>" style="width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px">
+            <% } else { %>
+              <i class="fas fa-user-circle"></i>
+            <% } %>
+            <%= user.name.split(' ')[0] %> <i class="fas fa-caret-down"></i>
+          </span>
+          <div class="user-dropdown" style="display:none;position:absolute;right:0;top:110%;background:#fff;border:1px solid #dee2e6;border-radius:8px;min-width:160px;box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:999">
+            <a href="/dashboard" style="display:block;padding:0.6rem 1rem;color:#333;text-decoration:none;font-size:0.9rem"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="/profile" style="display:block;padding:0.6rem 1rem;color:#333;text-decoration:none;font-size:0.9rem"><i class="fas fa-user-edit"></i> Profile</a>
+            <% if (user.role === 'admin') { %>
+              <a href="/admin" style="display:block;padding:0.6rem 1rem;color:#333;text-decoration:none;font-size:0.9rem"><i class="fas fa-cog"></i> Admin</a>
+              <a href="/admin/profile" style="display:block;padding:0.6rem 1rem;color:#333;text-decoration:none;font-size:0.9rem"><i class="fas fa-id-badge"></i> Admin Profile</a>
+            <% } %>
+            <a href="/logout" style="display:block;padding:0.6rem 1rem;color:#e74c3c;text-decoration:none;font-size:0.9rem;border-top:1px solid #dee2e6"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </div>
+        </div>
+        <script>
+          document.addEventListener('click', function(e) {
+            const menus = document.querySelectorAll('.user-dropdown');
+            menus.forEach(m => { if (!m.parentElement.contains(e.target)) m.style.display = 'none'; });
+          });
+          document.querySelectorAll('.user-greeting').forEach(el => {
+            el.addEventListener('click', function(e) {
+              e.stopPropagation();
+              const d = this.nextElementSibling;
+              d.style.display = d.style.display === 'none' ? 'block' : 'none';
+            });
+          });
+        </script>
+      <% } else { %>
+        <a href="/login" class="btn btn-sm">Login</a>
+      <% } %>
+    </div>
+    <button class="menu-toggle" onclick="document.getElementById('mainNav').classList.toggle('open')">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</header>
+<main>

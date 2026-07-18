@@ -1,0 +1,139 @@
+<%- include('../partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h1 class="page-title" style="margin:0"><i class="fas fa-chart-line"></i> Analytics</h1>
+      <a href="/admin" class="btn btn-outline btn-sm">← Dashboard</a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="admin-stats" style="margin-bottom:2rem">
+      <div class="stat-card">
+        <i class="fas fa-money-bill-wave"></i>
+        <div>
+          <span class="stat-num"><%= Number(totalRevenue).toLocaleString() %> RWF</span>
+          <span class="stat-label">Total Revenue</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-shopping-bag"></i>
+        <div>
+          <span class="stat-num"><%= totalOrders %></span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <div>
+          <span class="stat-num"><%= totalUsers %></span>
+          <span class="stat-label">Total Customers</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-mobile-alt"></i>
+        <div>
+          <span class="stat-num"><%= paymentStats.momo %> / <%= paymentStats.cod %></span>
+          <span class="stat-label">MoMo / COD Orders</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Revenue -->
+    <div class="admin-form-box" style="margin-bottom:2rem">
+      <h2 style="margin-bottom:1rem"><i class="fas fa-calendar"></i> Monthly Revenue (Last 6 Months)</h2>
+      <div style="overflow-x:auto">
+        <table class="cart-table">
+          <thead><tr><th>Month</th><th>Orders</th><th>Revenue</th><th>Bar</th></tr></thead>
+          <tbody>
+            <% const maxRev = Math.max(...monthly.map(m => m.revenue), 1); %>
+            <% monthly.forEach(m => { %>
+            <tr>
+              <td><strong><%= m.label %></strong></td>
+              <td><%= m.count %></td>
+              <td><strong style="color:var(--primary)"><%= Number(m.revenue).toLocaleString() %> RWF</strong></td>
+              <td style="width:200px">
+                <div style="background:#e8f5ee;border-radius:4px;height:20px;width:100%">
+                  <div style="background:var(--primary);height:20px;border-radius:4px;width:<%= Math.round((m.revenue/maxRev)*100) %>%"></div>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payment Breakdown -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem">
+      <div class="admin-form-box">
+        <h2 style="margin-bottom:1rem"><i class="fas fa-credit-card"></i> Payment Methods</h2>
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+              <span><i class="fas fa-money-bill-wave"></i> Cash on Delivery</span>
+              <strong><%= paymentStats.cod %> orders</strong>
+            </div>
+            <div style="background:#e8f5ee;border-radius:4px;height:16px">
+              <div style="background:var(--primary);height:16px;border-radius:4px;width:<%= totalOrders > 0 ? Math.round((paymentStats.cod/totalOrders)*100) : 0 %>%"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+              <span><i class="fas fa-mobile-alt"></i> MTN Mobile Money</span>
+              <strong><%= paymentStats.momo %> orders</strong>
+            </div>
+            <div style="background:#fff3cd;border-radius:4px;height:16px">
+              <div style="background:#f0a500;height:16px;border-radius:4px;width:<%= totalOrders > 0 ? Math.round((paymentStats.momo/totalOrders)*100) : 0 %>%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-form-box">
+        <h2 style="margin-bottom:1rem"><i class="fas fa-info-circle"></i> Quick Stats</h2>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.95rem">
+          <div style="display:flex;justify-content:space-between">
+            <span>Avg. Order Value</span>
+            <strong><%= totalOrders > 0 ? Number(Math.round(totalRevenue/totalOrders)).toLocaleString() : 0 %> RWF</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span>Avg. Spend per Customer</span>
+            <strong><%= totalUsers > 0 ? Number(Math.round(totalRevenue/totalUsers)).toLocaleString() : 0 %> RWF</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span>MoMo Usage</span>
+            <strong><%= totalOrders > 0 ? Math.round((paymentStats.momo/totalOrders)*100) : 0 %>%</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Tracking -->
+    <div class="admin-form-box">
+      <h2 style="margin-bottom:1rem"><i class="fas fa-users"></i> Customer Tracking</h2>
+      <% if (userStats.length === 0) { %>
+        <p style="color:var(--text-light)">No registered customers yet.</p>
+      <% } else { %>
+      <div style="overflow-x:auto">
+        <table class="cart-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Joined</th></tr></thead>
+          <tbody>
+            <% userStats.forEach(u => { %>
+            <tr>
+              <td><i class="fas fa-user" style="color:var(--primary)"></i> <%= u.name %></td>
+              <td><%= u.email %></td>
+              <td><span class="badge badge-success"><%= u.orders %></span></td>
+              <td><strong style="color:var(--primary)"><%= Number(u.spent).toLocaleString() %> RWF</strong></td>
+              <td><%= u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—' %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

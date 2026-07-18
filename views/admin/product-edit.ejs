@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h1 class="page-title" style="margin:0">Edit Product</h1>
+      <a href="/admin/products" class="btn btn-outline btn-sm">← Back</a>
+    </div>
+
+    <div class="admin-form-box">
+      <form action="/admin/products/<%= product._id %>/edit" method="POST">
+        <div class="admin-form-grid">
+          <div class="form-group">
+            <label>Name *</label>
+            <input type="text" name="name" value="<%= product.name %>" required />
+          </div>
+          <div class="form-group">
+            <label>Author</label>
+            <input type="text" name="author" value="<%= product.author || '' %>" />
+          </div>
+          <div class="form-group">
+            <label>Price (RWF) *</label>
+            <input type="number" name="price" value="<%= product.price %>" required min="0" />
+          </div>
+          <div class="form-group">
+            <label>Stock *</label>
+            <input type="number" name="stock" value="<%= product.stock %>" required min="0" />
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select name="categoryId" required>
+              <% categories.forEach(c => { %>
+              <option value="<%= c._id %>" <%= product.categoryId === c._id ? 'selected' : '' %>><%= c.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>ISBN</label>
+            <input type="text" name="isbn" value="<%= product.isbn || '' %>" />
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Description</label>
+            <textarea name="description" rows="3"><%= product.description || '' %></textarea>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Image URL</label>
+            <input type="text" name="image" value="<%= product.image || '' %>" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="/admin/products" class="btn btn-outline" style="margin-left:0.5rem">Cancel</a>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>
